@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Starter Node and Angular</title>
+
+    <script src="libs/socket.io-client/socket.io.js"></script>
 </head>
 <body>
 <div>
@@ -12,6 +14,35 @@
         <p><input type="password" name="password" value="" placeholder="Password"></p>
         <p class="submit"><input type="submit" name="commit" value="Login"></p>
     </form>
+
+    <script>
+        var socket = io.connect();
+
+        //
+        // These are just for testing purposes
+        // Interaction with the server will be abstracted via an 
+        // angular.js service.
+        //
+        // Implement all of the events shown at:
+        //     https://github.com/Automattic/socket.io/wiki/Exposed-events
+        // 
+
+        socket.on("reconnecting", function() {
+            console.log('reconnecting');
+        })
+
+        socket.on('connect', function () {
+            console.log('connect');
+        });
+
+        socket.on('error', function (data) {
+            console.log('error: ' + data);
+        });
+
+        socket.on("hello", function(data) {
+            alert(JSON.stringify(data));
+        });
+    </script>
 
 </div>
 </body>
