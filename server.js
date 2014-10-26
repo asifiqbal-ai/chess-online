@@ -94,7 +94,6 @@ sio.on("connection", function(socket) {
 
     socket.on('disconnect', function() {
         delete activeSockets[socket.request.user.id];
-        console.error(socket.request.user.id + " has disconnected!");
     });
 
     // Implement other socket activity here

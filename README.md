@@ -7,4 +7,4 @@ This is a simple online chess platform implemented with the MEAN stack. I will c
  * Simple mapping of {user.id => socket}.
 
 ### Notes
- * Currently session is being managed in main memory via express-session's default session store. I intend to configure a persistent memory store (most likely Redis), mainly for scalability and robustness.
+ * Currently, session is being stored via express-session's default session store. I intend to configure a persistent memory store (most likely Redis), mainly for scalability and robustness.
