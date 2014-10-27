@@ -6,9 +6,12 @@ var bodyParser     = require('body-parser');
 var cookieParser   = require('cookie-parser');
 var methodOverride = require('method-override');
 var expressSession = require('express-session');
+var connectFlash   = require('connect-flash');
 var mongoose       = require('mongoose');
 var passport       = require('passport');
 var authentication = require('./app/authentication');
+var routes         = require('./app/routes');
+var sockets        = require('./app/sockets');
 
 
 // database ==================================================================
@@ -30,6 +33,11 @@ var sessionMiddleware = expressSession({
 });
 
 
+// set up templating engine (jade) ===========================================
+app.set('views', './app/views');
+app.set('view engine', 'jade');
+
+
 // express middleware ========================================================
 app.use(express.static(__dirname + '/public'));
 app.use(cookieParser());
@@ -37,28 +45,11 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(methodOverride('X-HTTP-Method-Override'));
 app.use(sessionMiddleware);
+app.use(connectFlash());
 app.use(passportInitialize);
 app.use(passportSession);
-
-
-// configure routes ==========================================================
-//require('./app/routes')(app); // configure our routes 
-app.get('/index', function(req, res) {
-    res.sendfile('./public/views/index.html');
-});
-
-app.get('/failed', function(req, res) {
-    res.send("AUTHENTICATION FAILED ::: " + req.isAuthenticated());
-});
-
-app.get('/success', function(req, res) {
-    res.send("AUTHENTICATION SUCCEEDED ::: " + req.isAuthenticated());
-});
- 
-app.post('/login',
-    passport.authenticate('local', { successRedirect: '/index',
-                                     failureRedirect: '/failed' })
-);
+app.use('/app', routes.api());
+app.use('/', routes.main());
 
 
 // start server ==============================================================
@@ -96,25 +87,40 @@ sio.on("connection", function(socket) {
         delete activeSockets[socket.request.user.id];
     });
 
-    // Implement other socket activity here
+    sockets(socket, activeSockets);
 });
 
 
 // random stuff (development only - this will be implemented formally) =======
 var User = require('./app/models/user');
 
-new User({
-    first_name: "ahmed",
-    last_name: "mustafa",
-    username: "ahmedakzm",
-    email: "ahmed.akzm@gmail.com",
-    password: "ahmedahmed"
-}).save(function(err) {});
+User.remove({}, function(err) {
+    console.log("cleared User collection");
 
-new User({
-    first_name: "ahmed",
-    last_name: "mustafa",
-    username: "ahmedakzm2",
-    email: "ahmed.akzm2@gmail.com",
-    password: "ahmedahmed"
-}).save(function(err) {});
+    var Ahmed = new User({
+        first_name: "ahmed",
+        last_name: "mustafa",
+        username: "ahmedakzm",
+        email: "ahmed.akzm@gmail.com",
+        password: "ahmedahmed",
+        friends: []
+    });
+
+    Ahmed.save(function(err){
+        var Basil = new User({
+            first_name: "basil",
+            last_name: "mustafa",
+            username: "basilakzm",
+            email: "basil@gmail.com",
+            password: "basilbasil",
+            friends: [Ahmed]
+        });
+
+        Basil.save(function(err){
+            console.log("Initialized mock users {Ahmed} and {Basil}");
+            Ahmed.friends.push(Basil);
+            Ahmed.save(function(err) {});
+        });
+    });
+});
+

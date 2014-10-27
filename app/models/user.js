@@ -13,6 +13,7 @@ var UserSchema = new mongoose.Schema({
     username   : {type: String, required: true, unique: true},
     email      : {type: String, required: true, unique: true},
     password   : {type: String, required: true},
+    friends    : [{type: mongoose.Schema.Types.ObjectId, ref: 'User'}]
 });
 
 UserSchema.methods.isCorrectPassword = function(password) {
@@ -26,7 +27,7 @@ UserSchema.pre('save', function(next) {
         this.password = bcrypt.hashSync(this.password, bcrypt.genSaltSync());
         next();
     } else {
-        next(new Error("Password length must be greater than 5!"));
+        next(new Error("invalid password"));
     }
 });
 
