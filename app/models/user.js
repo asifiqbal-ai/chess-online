@@ -14,6 +14,7 @@ var UserSchema = new mongoose.Schema({
     email                : {type: String, required: true, unique: true},
     password             : {type: String, required: true},
     online               : {type: Boolean, required: true, default: false},
+    rank                 : {type: Number, required: true, default: 1200},
     sent_friend_requests : [{type: mongoose.Schema.Types.ObjectId, ref: 'User'}],
     recv_friend_requests : [{type: mongoose.Schema.Types.ObjectId, ref: 'User'}],
     friends              : [{type: mongoose.Schema.Types.ObjectId, ref: 'User'}]

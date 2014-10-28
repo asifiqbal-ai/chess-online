@@ -122,7 +122,19 @@ html
 
     .col-sm-9.col-sm-offset-3.col-md-10.col-md-offset-2
       div(ng-controller="PostsCtrl")
-        h3(ng-click="click()") {{ status }}
+        button(ng-click="click()") Update
+
+        h4 Friends:
+        ul
+          li(ng-repeat="user in status") {{ user.username }}, online: {{user.online}}
+
+        h4 Pending sent friend requests:
+        ul
+          li(ng-repeat="user in pending_requests.sent") {{ user.username }}, online: {{user.online}}
+
+        h4 Received friend requests:
+        ul
+          li(ng-repeat="user in pending_requests.received") {{ user.username }}, online: {{user.online}}
         
       .ng-view
 
