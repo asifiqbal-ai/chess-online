@@ -48,7 +48,7 @@ app.use(sessionMiddleware);
 app.use(connectFlash());
 app.use(passportInitialize);
 app.use(passportSession);
-app.use('/app', routes.api());
+app.use('/api', routes.api());
 app.use('/', routes.main());
 
 
@@ -59,6 +59,7 @@ var httpServer = app.listen(process.env.PORT || 8080);
 // set up socket.io ==========================================================
 var sio = socketIO(httpServer);
 var activeSockets = {/* maps user.id --> socket */};
+var activeSocketsCount = {/* counts active sockets per user */}
 
 sio.use(function(socket, next) {
     sessionMiddleware(socket.request, socket.request.res, next);
@@ -81,10 +82,30 @@ sio.use(function(socket, next) {
 });
 
 sio.on("connection", function(socket) {
-    activeSockets[socket.request.user.id] = socket;
+    var user_id = socket.request.user.id;
+
+    if(user_id in activeSockets) {
+        activeSockets[user_id][socket.id] = socket;
+        activeSocketsCount[user_id] += 1;
+    } else {
+        activeSockets[user_id] = {};
+        activeSockets[user_id][socket.id] = socket;
+        activeSocketsCount[user_id] = 1;
+    }
+
+    if(activeSocketsCount[user_id] === 1) {
+        socket.request.user.online = true;
+        socket.request.user.save();
+    }
 
     socket.on('disconnect', function() {
-        delete activeSockets[socket.request.user.id];
+        delete activeSockets[user_id][socket.id];
+        activeSocketsCount[user_id] -= 1;
+
+        if(!activeSocketsCount[user_id]) {
+            socket.request.user.online = false;
+            socket.request.user.save();
+        }
     });
 
     sockets(socket, activeSockets);

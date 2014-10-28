@@ -8,12 +8,15 @@ var isValidPassword = function(password) {
 };
 
 var UserSchema = new mongoose.Schema({
-    first_name : {type: String, required: true},
-    last_name  : {type: String, required: true},
-    username   : {type: String, required: true, unique: true},
-    email      : {type: String, required: true, unique: true},
-    password   : {type: String, required: true},
-    friends    : [{type: mongoose.Schema.Types.ObjectId, ref: 'User'}]
+    first_name           : {type: String, required: true},
+    last_name            : {type: String, required: true},
+    username             : {type: String, required: true, unique: true},
+    email                : {type: String, required: true, unique: true},
+    password             : {type: String, required: true},
+    online               : {type: Boolean, required: true, default: false},
+    sent_friend_requests : [{type: mongoose.Schema.Types.ObjectId, ref: 'User'}],
+    recv_friend_requests : [{type: mongoose.Schema.Types.ObjectId, ref: 'User'}],
+    friends              : [{type: mongoose.Schema.Types.ObjectId, ref: 'User'}]
 });
 
 UserSchema.methods.isCorrectPassword = function(password) {

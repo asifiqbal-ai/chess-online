@@ -1,4 +1,131 @@
-extends layout
+doctype html
+html
+  head
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title Chess Online
+    link(rel='stylesheet', href='libs/bootstrap/dist/css/bootstrap.min.css')
+    link(rel='stylesheet', href='libs/font-awesome/css/font-awesome.min.css')
+    link(rel='stylesheet', href='css/main.css')
+    script(src="libs/jquery/dist/jquery.min.js")
+    script(src="libs/bootstrap/dist/js/bootstrap.min.js")
+    script(src="libs/socket.io-client/socket.io.js")
+    script(src="libs/notifyjs/notify.min.js")
+    script(src="libs/angular/angular.min.js")
+    script(src="libs/angular-route/angular-route.min.js")
+    script(src="js/app.js")
+    base(href='/')
 
-block content
-  h1 Welcome!
+
+  body(style="padding-top: 50px", ng-app="chessOnline")
+    header
+      .navbar-primary
+        nav.navbar.navbar-inverse.navbar-fixed-top(style="border-radius: 0px")
+          .container(style="margin:0; width: 100%")
+            ul.nav.navbar-nav.navbar-right(style="margin-right:1em")
+              li
+                a#notifications-nav-btn(href="#")
+                  span.fa.fa-bell.fa-lg(style="color: rgb(255, 160, 160); margin: 0; padding: 0")
+                  span(style="margin-left: 0.4em; font-weight: bold") 4
+              li
+                a#messages-nav-btn(href="#")
+                  span.fa.fa-comments.fa-lg(style="color: rgb(255, 160, 160); margin: 0; padding: 0")
+                  span(style="margin-left: 0.4em; font-weight: bold") 2
+              li
+                a(href="/user/" + user.username)
+                  span.fa.fa-user.fa-lg(style="margin: 0 0.3em 0 0; padding: 0")
+                  | profile
+              li
+                a(href="/settings")
+                  span.fa.fa-cog.fa-lg(style="margin: 0 0.3em 0 0; padding: 0")
+                  | settings
+              li
+                a(href="/logout", target="_self")
+                  span.fa.fa-sign-out.fa-lg(style="margin: 0 0.3em 0 0; padding: 0")
+                  | log out
+
+
+      #notifications-popover(style="display: none", data-toggle="popover")
+        p(style="margin:10px; padding: 0; background-color: red") Isn't it notifications?
+
+
+      #messages-popover(style="display: none", data-toggle="popover")
+        p(style="margin:10px; padding: 0; background-color: red") Isn't it messages?
+
+
+      script.
+        $(function() {
+          var createPopover = function(selection, content_selector) {
+            selection.popover({
+              html: true,
+              placement: 'bottom', 
+              content: function() {return $(content_selector).html();}
+            });
+          }
+
+          createPopover($("#notifications-nav-btn"), "#notifications-popover");
+          createPopover($("#messages-nav-btn"), "#messages-popover");
+
+          $('html').on('click', function(e) {
+            var elem = $(e.target);
+            while(elem.length > 0) {
+              if (typeof elem.data('original-title') != 'undefined')
+                return;
+              elem = elem.parent();
+            }
+
+            $('[data-original-title]').popover('hide');
+          });
+        });
+
+      style.
+        .popover-content {
+          padding: 0 !important;
+        }
+
+
+    .col-sm-3.col-md-2.sidebar
+      center
+        h5.sidebar-well-title.emboss-text GAMES
+      .well.sidebar-well.pre-scrollable(style="max-height: 24%")
+        ul.nav.nav-sidebar
+          li 
+            a Hello
+          li 
+            a World
+          li 
+            a Hello
+          li
+            a(href="/games/new")
+              span.fa.fa-plus-circle.fa-lg(style="margin: 0 0.5em 0 0; padding: 0")
+              | start new game
+
+      center(style="margin-top: 1.2em")
+        h5.sidebar-well-title.emboss-text FRIENDS
+      .well.sidebar-well.pre-scrollable(style="max-height: 64%")
+        ul.nav.nav-sidebar
+          li 
+            a Hello
+          li 
+            a World
+          li 
+            a I am a list
+          li 
+            a of Items!
+          li 
+            a Hello
+          li
+            a(href="/friends/add")
+              span.fa.fa-plus-circle.fa-lg(style="margin: 0 0.5em 0 0; padding: 0")
+              | add friends
+
+
+
+    .col-sm-9.col-sm-offset-3.col-md-10.col-md-offset-2
+      div(ng-controller="PostsCtrl")
+        h3(ng-click="click()") {{ status }}
+        
+      .ng-view
+
+
+    script.
+      var socket = io.connect(); // Signs in
