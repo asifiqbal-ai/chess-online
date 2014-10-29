@@ -16,7 +16,7 @@ html
     base(href='/')
 
 
-  body(style="padding-top: 50px", ng-app="chessOnline")
+  body(style="padding-top: 40px", ng-app="chessOnline")
     header
       .navbar-primary
         nav.navbar.navbar-inverse.navbar-fixed-top(style="border-radius: 0px")
@@ -29,7 +29,11 @@ html
               li
                 a#messages-nav-btn(href="#")
                   span.fa.fa-comments.fa-lg(style="color: rgb(255, 160, 160); margin: 0; padding: 0")
-                  span(style="margin-left: 0.4em; font-weight: bold") 2
+                  span(style="margin-left: 0.4em; font-weight: bold") 6
+              li
+                a#friend-requests-nav-btn(href="#")
+                  span.fa.fa-users.fa-lg(style="color: rgb(255, 160, 160); margin: 0; padding: 0")
+                  span(style="margin-left: 0.4em; font-weight: bold") 1
               li
                 a(href="/user/" + user.username)
                   span.fa.fa-user.fa-lg(style="margin: 0 0.3em 0 0; padding: 0")
@@ -52,6 +56,10 @@ html
         p(style="margin:10px; padding: 0; background-color: red") Isn't it messages?
 
 
+      #friend-requests-popover(style="display: none", data-toggle="popover")
+        p(style="margin:10px; padding: 0; background-color: red") Isn't it friends??
+
+
       script.
         $(function() {
           var createPopover = function(selection, content_selector) {
@@ -64,6 +72,7 @@ html
 
           createPopover($("#notifications-nav-btn"), "#notifications-popover");
           createPopover($("#messages-nav-btn"), "#messages-popover");
+          createPopover($("#friend-requests-nav-btn"), "#friend-requests-popover");
 
           $('html').on('click', function(e) {
             var elem = $(e.target);
@@ -88,31 +97,28 @@ html
         h5.sidebar-well-title.emboss-text GAMES
       .well.sidebar-well.pre-scrollable(style="max-height: 24%")
         ul.nav.nav-sidebar
-          li 
+          li
             a Hello
-          li 
+          li
             a World
-          li 
-            a Hello
           li
             a(href="/games/new")
               span.fa.fa-plus-circle.fa-lg(style="margin: 0 0.5em 0 0; padding: 0")
               | start new game
 
+
       center(style="margin-top: 1.2em")
         h5.sidebar-well-title.emboss-text FRIENDS
-      .well.sidebar-well.pre-scrollable(style="max-height: 64%")
+
+      .well.sidebar-well.pre-scrollable(style="max-height: 64%", ng-controller="NavSbFriendsCtrl")
         ul.nav.nav-sidebar
-          li 
-            a Hello
-          li 
-            a World
-          li 
-            a I am a list
-          li 
-            a of Items!
-          li 
-            a Hello
+          li(ng-repeat="friend in friends.friends | orderObjectBy:'username'")
+            a(href="/user/{{ friend.username }}")
+              span.fa.fa-circle.fa(style="margin: 0 0.5em 0 0; padding: 0; color: rgb(38, 164, 75)", ng-if="friend.online")
+              span.fa.fa-circle.fa(style="margin: 0 0.5em 0 0; padding: 0; color: rgb(176, 176, 176)", ng-if="!friend.online")
+              | {{ friend.username }} 
+              span(style="font-size: 80%; font-style: italic") ({{ friend.rank }})
+
           li
             a(href="/friends/add")
               span.fa.fa-plus-circle.fa-lg(style="margin: 0 0.5em 0 0; padding: 0")
@@ -121,23 +127,4 @@ html
 
 
     .col-sm-9.col-sm-offset-3.col-md-10.col-md-offset-2
-      div(ng-controller="PostsCtrl")
-        button(ng-click="click()") Update
-
-        h4 Friends:
-        ul
-          li(ng-repeat="user in status") {{ user.username }}, online: {{user.online}}
-
-        h4 Pending sent friend requests:
-        ul
-          li(ng-repeat="user in pending_requests.sent") {{ user.username }}, online: {{user.online}}
-
-        h4 Received friend requests:
-        ul
-          li(ng-repeat="user in pending_requests.received") {{ user.username }}, online: {{user.online}}
-        
       .ng-view
-
-
-    script.
-      var socket = io.connect(); // Signs in

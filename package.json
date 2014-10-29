@@ -13,6 +13,7 @@
         "passport" : "~0.2.x",
         "passport-local" : "~1.0.x",
         "bcrypt-nodejs" : "~0.0.3",
-        "jade" : "*"
+        "jade" : "*",
+        "underscore" : "~1.7.x"
     }
 }

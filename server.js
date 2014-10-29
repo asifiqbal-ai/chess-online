@@ -23,6 +23,17 @@ mongoose.connect(db.url);
 authentication(passport);
 var passportInitialize = passport.initialize();
 var passportSession = passport.session();
+var passportUpdateUser = function(req, res, next) {
+    if(req.isAuthenticated()) {
+        User.findById(req.session.passport.user, function(err, user) {
+            // Assuming an error will never occur ... tidy up later
+            req.user = user;
+            next();
+        });
+    } else {
+        next();
+    }
+};
 
 
 // set up express session ====================================================
@@ -48,6 +59,7 @@ app.use(sessionMiddleware);
 app.use(connectFlash());
 app.use(passportInitialize);
 app.use(passportSession);
+app.use(passportUpdateUser);
 app.use('/api', routes.api());
 app.use('/', routes.main());
 
@@ -56,10 +68,10 @@ app.use('/', routes.main());
 var httpServer = app.listen(process.env.PORT || 8080);
 
 
-// set up socket.io ==========================================================
+// set up sockets.io =========================================================
 var sio = socketIO(httpServer);
-var activeSockets = {/* maps user.id --> socket */};
 var activeSocketsCount = {/* counts active sockets per user */};
+sockets.initialize(sio);
 
 sio.use(function(socket, next) {
     sessionMiddleware(socket.request, socket.request.res, next);
@@ -82,33 +94,30 @@ sio.use(function(socket, next) {
 });
 
 sio.on("connection", function(socket) {
-    var user_id = socket.request.user.id;
+    var user = socket.request.user;
 
-    if(user_id in activeSockets) {
-        activeSockets[user_id][socket.id] = socket;
-        activeSocketsCount[user_id] += 1;
-    } else {
-        activeSockets[user_id] = {};
-        activeSockets[user_id][socket.id] = socket;
-        activeSocketsCount[user_id] = 1;
-    }
-
-    if(activeSocketsCount[user_id] === 1) {
-        socket.request.user.online = true;
-        socket.request.user.save();
+    if(!(user.id in activeSocketsCount))
+        activeSocketsCount[user.id] = 0;
+    activeSocketsCount[user.id] += 1;
+    
+    if(activeSocketsCount[user.id] === 1) {
+        user.online = true;
+        user.save(function() {
+            sockets.userConnected(sio, socket, user);
+        });
     }
 
     socket.on('disconnect', function() {
-        delete activeSockets[user_id][socket.id];
-        activeSocketsCount[user_id] -= 1;
-
-        if(!activeSocketsCount[user_id]) {
-            socket.request.user.online = false;
-            socket.request.user.save();
+        activeSocketsCount[user.id] -= 1;
+        if(!activeSocketsCount[user.id]) {
+            user.online = false;
+            user.save(function() {
+                sockets.userDisconnected(sio, socket, user);
+            });
         }
     });
 
-    sockets(socket, activeSockets);
+    sockets.onConnection(sio, socket, user);
 });
 
 

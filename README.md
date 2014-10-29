@@ -8,7 +8,10 @@ This is a simple online chess platform implemented with the MEAN stack. I will c
  * Set up core routing functionality for both angular.js and node.js
  * Implemented UI's for logging in and signing up.
  * Partially implemented skeleton for the actual application.
- * Started implementing friend management API
+ * Implemented friend management API
+ * Refactored client and server side socket.io services/modules
+ * Implemented UI's for adding friends and removing friends 
+ * Implemented 'friends' panel on the side - lists friends and their status' - links to their profiles
 
 ### Notes
  * The User model is not currently validated at all - on neither the client side or the server side. I will tend to this once I've got a simple prototype working. For now I will maintain a list of bugs caused by this lack of validation (so I can remember to test them later):

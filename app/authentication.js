@@ -12,7 +12,8 @@ module.exports = function(passport) {
     });
 
     passport.use(new LocalStrategy(function(id, password, done) {
-        User.findOne({$or: [{username: id},{email: id}]}, function(err, user) {
+        var search = new RegExp('^' + id + '$', 'i');
+        User.findOne({$or: [{username: search},{email: search}]}, function(err, user) {
             if(err) {
                 return done(null, false, {message: "Error occured while processing query"});
             } else if(!user) {
