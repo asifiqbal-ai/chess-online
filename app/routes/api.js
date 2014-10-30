@@ -5,6 +5,30 @@ var sockets    = require('../sockets');
 
 var EXPOSED_USER_FIELDS = 'first_name last_name username email rank online -_id';
 
+var addFriendStatus = function(user, targetList) {
+    var friends = _.pluck(user.friends, 'username');
+    var req_sent = _.pluck(user.sent_friend_requests, 'username');
+    var req_recv = _.pluck(user.recv_friend_requests, 'username');
+    return _.map(targetList, function(u) {
+        var is_friend = _.contains(friends, u.username);
+        var has_sent_request = _.contains(req_sent, u.username);
+        var has_recv_request = _.contains(req_recv, u.username);
+        var no_interaction = !(is_friend || has_sent_request || has_recv_request);
+        return {
+            first_name: u.first_name,
+            last_name: u.last_name,
+            username: u.username,
+            email: u.email,
+            rank: u.rank,
+            online: u.online,
+            is_friend: is_friend,
+            has_sent_request: has_sent_request,
+            has_recv_request: has_recv_request,
+            no_interaction: no_interaction
+        };
+    });
+};
+
 module.exports = function(router) {
     router.use(function(req, res, next) {
         if(req.isAuthenticated()) {
@@ -25,7 +49,9 @@ module.exports = function(router) {
                 res.status(404); // not found
                 res.send("User not found");
             } else {
-                res.json(user);
+                req.user.populate('friends recv_friend_requests sent_friend_requests', function() {
+                    res.json(addFriendStatus(req.user, [user])[0]);
+                });
             }
         });
     });
@@ -44,33 +70,7 @@ module.exports = function(router) {
 
         User.find(search_term, function(err, users) {
             req.user.populate('friends recv_friend_requests sent_friend_requests', function() {
-                var friends = _.pluck(req.user.friends, 'username');
-                var req_sent = _.pluck(req.user.sent_friend_requests, 'username');
-                var req_recv = _.pluck(req.user.recv_friend_requests, 'username');
-
-                console.log(friends);
-                users = _.map(users, function(user) {
-                    console.log(user.username);
-                    var is_friend = _.contains(friends, user.username);
-                    var has_sent_request = _.contains(req_sent, user.username);
-                    var has_recv_request = _.contains(req_recv, user.username);
-                    var no_interaction = !(is_friend || has_sent_request || has_recv_request);
-                    return {
-                        first_name: user.first_name,
-                        last_name: user.last_name,
-                        username: user.username,
-                        email: user.email,
-                        rank: user.rank,
-                        is_friend: is_friend,
-                        has_sent_request: has_sent_request,
-                        has_recv_request: has_recv_request,
-                        no_interaction: no_interaction
-                    };
-                });
-
-                console.log(users);
-
-                res.json(_.filter(users, function(user) {
+                res.json(_.filter(addFriendStatus(req.user, users), function(user) {
                    return user.username != req.user.username;
                 }));
             });
@@ -78,16 +78,16 @@ module.exports = function(router) {
     });
 
     router.get('/friends', function(req, res) {
-        req.user.populate('friends', EXPOSED_USER_FIELDS, function() {
-            res.json(_.indexBy(req.user.friends, 'username'));
+        req.user.populate('friends recv_friend_requests sent_friend_requests', EXPOSED_USER_FIELDS, function() {
+            res.json(_.indexBy(addFriendStatus(req.user, req.user.friends), 'username'));
         });
     });
 
     router.get('/friends/requests', function(req, res) {
-        req.user.populate('recv_friend_requests sent_friend_requests', EXPOSED_USER_FIELDS, function() {
+        req.user.populate('friends recv_friend_requests sent_friend_requests', EXPOSED_USER_FIELDS, function() {
             res.json({
-                sent: _.indexBy(req.user.sent_friend_requests, 'username'),
-                received: _.indexBy(req.user.recv_friend_requests, 'username')
+                sent: _.indexBy(addFriendStatus(req.user, req.user.sent_friend_requests), 'username'),
+                received: _.indexBy(addFriendStatus(req.user, req.user.recv_friend_requests), 'username')
             });
         });
     });
@@ -110,9 +110,7 @@ module.exports = function(router) {
                 req.user.populate(toPopulate, function() {
                     user.populate(toPopulate, function() {
                         var friends = _.pluck(req.user.friends, 'username');
-
                         if(_.contains(friends, user.username)) {
-                            res.status(200);
                             req.user.friends = _.filter(req.user.friends, function(u) {
                                 return u.username !== user.username;
                             });

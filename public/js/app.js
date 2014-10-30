@@ -99,13 +99,16 @@ app.factory('friends', ['$http', '$rootScope','socket',
 
         instance.friends = {};
         instance.pending = {received: {}, sent: {}};
+        instance.cache = {};
         
         instance.update = function() {
             $http.get('/api/friends').success(function(data) {
                 instance.friends = data;
+                instance.cache = _.extend(instance.cache, data);
             });
             $http.get('/api/friends/requests').success(function(data) {
                 instance.pending = data;
+                instance.cache = _.extend(instance.cache, data.received, data.sent);
             });
         };
 
@@ -116,35 +119,29 @@ app.factory('friends', ['$http', '$rootScope','socket',
         instance.make_request = function(username, callback) {
             $http.post('/api/friends/requests/make', {username: username}).success(function() {
                 instance.update();
-                if(callback)
-                    callback();
+                if(callback) callback();
             });
         };
 
         instance.unfriend = function(username, callback) {
             $http.post('/api/friends/remove', {username: username}).success(function() {
                 instance.update();
-                if(callback)
-                    callback();
+                if(callback) callback();
             });
         };
 
         instance.get_user_info = function(username, callback) {
-            var data = null;
-
-            if(username in instance.friends) {
-                data = instance.friends[username];
-            } else if(username in instance.pending.received) {
-                data = instance.pending.received[username];
-            } else if(username in instance.pending.sent) {
-                data = instance.pending.sent[username];
-            }
-
-            if(data) {
-                callback(data);
+            if(username in instance.cache) {
+                callback(instance.cache[username]);
             } else {
                 $http.get('/api/friends/info/' + username).success(callback);
             }
+        };
+
+        instance.update_user = function(username) {
+            $http.get('/api/friends/info/' + username).success(function(data) {
+                instance.cache[username] = data;
+            });
         };
 
         socket.on('friend update total', instance.update);
@@ -209,21 +206,27 @@ app.controller("AddFriendCtrl", ['$scope', '$http', 'friends',
 
 
 
-app.controller("ProfileCtrl", ['$scope', '$routeParams','friends',
-    function($scope, $routeParams, friends) {
+app.controller("ProfileCtrl", ['$scope', '$routeParams','friends', 'socket',
+    function($scope, $routeParams, friends, socket) {
         $scope.username = $routeParams.username;
-        $scope.data = [];
+        $scope.friends = friends;
 
-        friends.get_user_info($routeParams.username, function(data) {
-            $scope.data = data;
-        });
-
-        $scope.remove = function() {
+        $scope.unfriend = function() {
             friends.unfriend($routeParams.username, function() {
-                friends.get_user_info($routeParams.username, function(data) {
-                    $scope.data = data;
-                });
+                friends.update_user($scope.username);
             });
         };
+
+        $scope.friend_request = function() {
+            friends.make_request($scope.username, function() {
+                friends.update_user($scope.username);
+            });
+        };
+
+        socket.on('friend update total', function() {
+            friends.update_user($scope.username);
+        });
+
+        friends.update_user($scope.username);
     }
 ]);

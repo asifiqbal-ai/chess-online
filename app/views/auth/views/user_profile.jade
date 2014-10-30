@@ -1,5 +1,16 @@
-h1 {{ username }}
+div(style="position: relative")
+  h1(style="text-transform: capitalize")
+    span.fa.fa-user.fa(style="margin: 0 0.3em 0 0; padding: 0")
+    | {{ friends.cache[username].first_name }} {{ friends.cache[username].last_name }}
 
-h3 {{ data }}
+  input.btn.btn-danger(type="button", value="Unfriend", ng-click="unfriend()", style="position: absolute; top: 0; right: 0;", ng-if="friends.cache[username].is_friend")
 
-input.btn.btn-primary.btn-lg(type="button", value="Unfriend", ng-click="remove()")
+  input.btn.btn-default(type="button", value="Friend request sent", style="position: absolute; top: 0; right: 0;", disabled="true", ng-if="friends.cache[username].has_sent_request")
+
+  input.btn.btn-success(type="button", value="Accept friend request", ng-click="friend_request()", style="position: absolute; top: 0; right: 0;", ng-if="friends.cache[username].has_recv_request",)
+
+  input.btn.btn-primary(type="button", value="Add friend", ng-click="friend_request()", style="position: absolute; top: 0; right: 0;", ng-if="friends.cache[username].no_interaction")
+
+h3 username: {{ friends.cache[username].username }}
+h3 rank: {{ friends.cache[username].rank }}
+h3 [TODO:] Later display paginated table showing history of games played and tidy up this page
