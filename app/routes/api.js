@@ -104,19 +104,38 @@ module.exports = function(router) {
                 res.send("User not found");
             } else if(user.username === req.user.username) {
                 res.status(409);
-                res.send("You cannot add yourself");
+                res.send("You cannot remove yourself");
             } else {
+                var filter = function(userList, user) {
+                    return _.filter(userList, function(u) {
+                        return u.username !== user.username;
+                    });
+                };
+
                 var toPopulate = 'friends sent_friend_requests recv_friend_requests';
+
                 req.user.populate(toPopulate, function() {
                     user.populate(toPopulate, function() {
                         var friends = _.pluck(req.user.friends, 'username');
+                        var req_sent = _.pluck(req.user.sent_friend_requests, 'username');
+                        var req_recv = _.pluck(req.user.recv_friend_requests, 'username');
+                        var updated = false;
+
                         if(_.contains(friends, user.username)) {
-                            req.user.friends = _.filter(req.user.friends, function(u) {
-                                return u.username !== user.username;
-                            });
-                            user.friends = _.filter(user.friends, function(u) {
-                                return u.username !== req.user.username;
-                            });
+                            req.user.friends = filter(req.user.friends, user);
+                            user.friends = filter(user.friends, req.user);
+                            updated = true;
+                        } else if(_.contains(req_sent, user.username)) {
+                            req.user.sent_friend_requests = filter(req.user.sent_friend_requests, user);
+                            user.recv_friend_requests = filter(user.recv_friend_requests, req.user);
+                            updated = true;
+                        } else if(_.contains(req_recv, user.username)) {
+                            req.user.recv_friend_requests = filter(req.user.recv_friend_requests, user);
+                            user.sent_friend_requests = filter(user.sent_friend_requests, req.user);
+                            updated = true;
+                        }
+
+                        if(updated) {
                             req.user.save(function() {
                                 user.save(function() {
                                     res.status(200);
@@ -127,7 +146,7 @@ module.exports = function(router) {
                             });
                         } else {
                             res.status(404);
-                            res.send("Not currently friends");
+                            res.send("No interaction found");
                         }
                     });
                 });

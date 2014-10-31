@@ -6,8 +6,10 @@ div(style="position: relative")
   input.btn.btn-danger(type="button", value="Unfriend", ng-click="unfriend()", style="position: absolute; top: 0; right: 0;", ng-if="friends.cache[username].is_friend")
 
   input.btn.btn-default(type="button", value="Friend request sent", style="position: absolute; top: 0; right: 0;", disabled="true", ng-if="friends.cache[username].has_sent_request")
+  input.btn.btn-danger(type="button", value="Cancel request", style="position: absolute; top: 38px; right: 0;", ng-click="unfriend()", ng-if="friends.cache[username].has_sent_request")
 
   input.btn.btn-success(type="button", value="Accept friend request", ng-click="friend_request()", style="position: absolute; top: 0; right: 0;", ng-if="friends.cache[username].has_recv_request",)
+  input.btn.btn-danger(type="button", value="Deny friend request", ng-click="unfriend()", style="position: absolute; top: 38px; right: 0;", ng-if="friends.cache[username].has_recv_request",)
 
   input.btn.btn-primary(type="button", value="Add friend", ng-click="friend_request()", style="position: absolute; top: 0; right: 0;", ng-if="friends.cache[username].no_interaction")
 
