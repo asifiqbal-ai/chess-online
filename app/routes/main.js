@@ -39,10 +39,13 @@ module.exports = function(router) {
     );
 
     router.post('/signup', function(req, res) {
+        // this is really lacking validation
+        // [TODO] for next refactor!
+
         var first_name = "" || req.body.first_name;
         var last_name = "" || req.body.last_name;
-        var username = "" || req.body.username;
-        var email = "" || req.body.email;
+        var username = new RegExp('.*' + ("" || req.body.username) + '.*', 'i')
+        var email = new RegExp('.*' + ("" || req.body.email) + '.*', 'i');
         var password = "" || req.body.password;
         var password_confirm = "" || req.body.password_confirm;
 
@@ -56,8 +59,8 @@ module.exports = function(router) {
                         var newUser = new User({
                             first_name: first_name,
                             last_name: last_name,
-                            username: username,
-                            email: email,
+                            username: req.body.username,
+                            email: req.body.email,
                             password: password,
                             friends: []
                         });
@@ -99,6 +102,11 @@ module.exports = function(router) {
     });
 
     router.get('*', function(req, res) {
+        /* 
+         * This really shouldn't redirect in the case of authenticated users.
+         * It should instead serve the angular.js bootstrap page - so that angular
+         * may handle the route. Will fix later [TODO]
+         */
         res.redirect('/');
     });
 };

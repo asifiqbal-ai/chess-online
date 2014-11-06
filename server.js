@@ -26,7 +26,6 @@ var passportSession = passport.session();
 var passportUpdateUser = function(req, res, next) {
     if(req.isAuthenticated()) {
         User.findById(req.session.passport.user, function(err, user) {
-            // Assuming an error will never occur ... tidy up later
             req.user = user;
             next();
         });
@@ -38,7 +37,7 @@ var passportUpdateUser = function(req, res, next) {
 
 // set up express session ====================================================
 var sessionMiddleware = expressSession({
-    secret: 'SOME_SECRET_KEY', // This will become an environment variable later
+    secret: 'SOME_SECRET_KEY', // This will be an environment variable later
     saveUninitialized: true,
     resave: true
 });
@@ -60,8 +59,10 @@ app.use(connectFlash());
 app.use(passportInitialize);
 app.use(passportSession);
 app.use(passportUpdateUser);
-app.use('/api', routes.api());
-app.use('/', routes.main());
+
+
+// configure routes ==========================================================
+routes.configure(app);
 
 
 // start server ==============================================================
@@ -160,9 +161,10 @@ User.remove({}, function(err) {
             });
 
             Basil.save(function(err){
-                console.log("Initialized mock users {Ahmed} and {Basil}");
                 Ahmed.friends.push(Basil);
-                Ahmed.save(function(err) {});
+                Ahmed.save(function(err) {
+
+                });
             });
         });
     });

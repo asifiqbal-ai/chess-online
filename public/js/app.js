@@ -157,6 +157,34 @@ app.factory('friends', ['$http', '$rootScope','socket',
 
 
 
+// Friends Top bar navigation panel controller... (Sb = Sidebar, Tb = Top bar)
+app.controller("NavTbFriendsCtrl", ['$scope', 'friends',
+    function($scope, friends) {
+        $scope.friends = friends;
+
+        $scope.clicked = function() {
+            alert("CLICKED");
+        };
+
+        $scope.unfriend = function(username) {
+            console.log("Unfriending " + username);
+            friends.unfriend(username, function() {
+                friends.update_user(username);
+            });
+        };
+
+        $scope.friend_request = function(username) {
+            console.log("Friending " + username);
+            friends.make_request(username, function() {
+                friends.update_user(username);
+            });
+        };
+    }
+]);
+
+
+
+// Friends sidebar navigation panel controller... (Sb = Sidebar, Tb = Top bar)
 app.controller("NavSbFriendsCtrl", ['$scope', 'friends',
     function($scope, friends) {
         $scope.friends = friends;
@@ -168,6 +196,7 @@ app.controller("NavSbFriendsCtrl", ['$scope', 'friends',
 app.controller("AddFriendCtrl", ['$scope', '$http', 'friends',
     function($scope, $http, friends) {
         $scope.keywords = "";
+        $scope.searching = false;
         $scope.results = [];
 
         $scope.make_request = function(friend) {
@@ -178,28 +207,29 @@ app.controller("AddFriendCtrl", ['$scope', '$http', 'friends',
             });
         };
 
+        var search = function(keywords) {
+            if(!keywords) {
+                $scope.results = [];
+                $scope.searching = false;
+                return;
+            }
+            $scope.searching = true;
+            friends.search(keywords).success(function(data) {
+                $scope.searching = false;
+                $scope.results = data;
+            });
+        };
+
         $scope.$watch(function() {
             return friends.friends;
         }, function(newVal) {
-            if(!$scope.keywords) {
-                $scope.results = [];
-                return;
-            }
-            friends.search($scope.keywords).success(function(data) {
-                $scope.results = data;
-            });
+            search($scope.keywords);
         });
 
         $scope.$watch(function() {
             return $scope.keywords;
         }, function(keywords) {
-            if(!keywords) {
-                $scope.results = [];
-                return;
-            }
-            friends.search(keywords).success(function(data) {
-                $scope.results = data;
-            });
+            search(keywords);
         });
     }
 ]);

@@ -3,25 +3,24 @@ var LocalStrategy = require('passport-local').Strategy;
 
 
 module.exports = function(passport) {
-    passport.serializeUser(function(user, done) {
-        done(null, user.id);
+    passport.serializeUser(function(user, next) {
+        next(null, user.id);
     });
 
-    passport.deserializeUser(function(id, done) {
-        User.findById(id, done);
+    passport.deserializeUser(function(id, next) {
+        User.findById(id, next);
     });
 
-    passport.use(new LocalStrategy(function(id, password, done) {
-        var search = new RegExp('^' + id + '$', 'i');
-        User.findOne({$or: [{username: search},{email: search}]}, function(err, user) {
+    passport.use(new LocalStrategy(function(id, password, next) {
+        User.findOneExact(id, function(err, user) {
             if(err) {
-                return done(null, false, {message: "Error occured while processing query"});
+                next(null, false, {message: "Error occured while processing query"});
             } else if(!user) {
-                return done(null, false, {message: "Incorrect username or email"});
+                next(null, false, {message: "Incorrect username or email"});
             } else if(user.isCorrectPassword(password)) {
-                return done(null, user);
+                next(null, user);
             } else {
-                return done(null, false, {message: "Incorrect password"});
+                next(null, false, {message: "Incorrect password"});
             }
         });
     }));

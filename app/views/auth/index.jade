@@ -27,14 +27,44 @@ html
                 a#notifications-nav-btn(href="#")
                   span.fa.fa-bell.fa-lg(style="color: rgb(255, 160, 160); margin: 0; padding: 0")
                   span(style="margin-left: 0.4em; font-weight: bold") 4
+
+                #notifications-popover(style="display: none", data-toggle="popover")
+                  p(style="margin:10px; padding: 0; background-color: red") Isn't it notifications?
+
               li
                 a#messages-nav-btn(href="#")
                   span.fa.fa-comments.fa-lg(style="color: rgb(255, 160, 160); margin: 0; padding: 0")
                   span(style="margin-left: 0.4em; font-weight: bold") 6
-              li
+
+                #messages-popover(style="display: none", data-toggle="popover")
+                  p(style="margin:10px; padding: 0; background-color: red") Isn't it messages?
+
+              li(ng-controller="NavTbFriendsCtrl")
                 a#friend-requests-nav-btn(href="#")
                   span.fa.fa-users.fa-lg(style="color: rgb(255, 160, 160); margin: 0; padding: 0")
                   span(style="margin-left: 0.4em; font-weight: bold") 1
+
+                #friend-requests-popover(style="display: none", data-toggle="popover")
+                  {{ friends.pending.received }}
+                  h4 --------------------------------
+                  {{ friends.pending.sent }}
+                  h4 --------------------------------
+                  h4 Received:
+                  .search-result(ng-repeat="user in friends.pending.received | orderBy:'username'", style="position: relative; height: 3.2em")
+                    h4(style="position: absolute; top: 0.2em; left: 0.3em; margin: 0") {{ user.first_name }} {{ user.last_name }}
+                    a(href="/user/{{ user.username }}", style="position: absolute; bottom: 0.3em; left: 0.6em; margin: 0") {{ user.username }}
+                      span(style="font-size: 80%; font-style: italic") ({{ user.rank }})
+                    input(type="button", value="accept request", style="position: absolute; bottom: 0; right: 0;", ng-click="clicked()")
+
+                  h4 --------------------------------
+                  h4 Sent:
+                  .search-result(ng-repeat="user in friends.pending.sent | orderBy:'username'", style="position: relative; height: 3.2em")
+                    h4(style="position: absolute; top: 0.2em; left: 0.3em; margin: 0") {{ user.first_name }} {{ user.last_name }}
+                    a(href="/user/{{ user.username }}", style="position: absolute; bottom: 0.3em; left: 0.6em; margin: 0") {{ user.username }}
+                      span(style="font-size: 80%; font-style: italic") ({{ user.rank }})
+                    input(type="button", value="cancel request", style="position: absolute; bottom: 0; right: 0;", ng-click="clicked()")
+
+
               li
                 a(href="/user/" + user.username)
                   span.fa.fa-user.fa-lg(style="margin: 0 0.3em 0 0; padding: 0")
@@ -48,17 +78,6 @@ html
                   span.fa.fa-sign-out.fa-lg(style="margin: 0 0.3em 0 0; padding: 0")
                   | log out
 
-
-      #notifications-popover(style="display: none", data-toggle="popover")
-        p(style="margin:10px; padding: 0; background-color: red") Isn't it notifications?
-
-
-      #messages-popover(style="display: none", data-toggle="popover")
-        p(style="margin:10px; padding: 0; background-color: red") Isn't it messages?
-
-
-      #friend-requests-popover(style="display: none", data-toggle="popover")
-        p(style="margin:10px; padding: 0; background-color: red") Isn't it friends??
 
 
       script.
