@@ -3,14 +3,14 @@ html
   head
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
     title Chess Online
-    link(rel='stylesheet', href='libs/bootstrap/dist/css/bootstrap.min.css')
-    link(rel='stylesheet', href='libs/font-awesome/css/font-awesome.min.css')
-    script(src="libs/jquery/dist/jquery.min.js")
-    script(src="libs/bootstrap/dist/js/bootstrap.min.js")
-    script(src="libs/notifyjs/notify.min.js")
+    link(rel='stylesheet', href='/libs/bootstrap/dist/css/bootstrap.min.css')
+    link(rel='stylesheet', href='/libs/font-awesome/css/font-awesome.min.css')
+    script(src="/libs/jquery/dist/jquery.min.js")
+    script(src="/libs/bootstrap/dist/js/bootstrap.min.js")
+    script(src="/libs/notifyjs/notify.min.js")
 
   body
-    if error.length > 0
+    - each error in errors
       script.
         $.notify("#{error}", {
           clickToHide: true,
@@ -32,17 +32,17 @@ html
         .row
           .form-group.col-sm-6
             label(for="username") First name
-            input.form-control(required, type="text", name="first_name", placeholder="Enter first name")
+            input.form-control(required, type="text", name="first_name", placeholder="Enter first name", value=user.first_name)
           .form-group.col-sm-6
             label(for="username") Last name
-            input.form-control(required, type="text", name="last_name", placeholder="Enter last name")
+            input.form-control(required, type="text", name="last_name", placeholder="Enter last name", value=user.last_name)
         .row
           .form-group.col-sm-6
             label(for="username") Username
-            input.form-control(required, type="text", name="username", placeholder="Enter username") 
+            input.form-control(required, type="text", name="username", placeholder="Enter username", value=user.username) 
           .form-group.col-sm-6
             label(for="username") Email
-            input.form-control(required, type="text", name="email", placeholder="Enter email")
+            input.form-control(required, type="text", name="email", placeholder="Enter email", value=user.email)
         .row
           .form-group.col-sm-6
             label(for="username") Password
@@ -51,7 +51,6 @@ html
             label(for="username") Confirm password
             input.form-control(required, type="password", name="password_confirm", placeholder="Confirm password")
         input.btn.btn-primary(type="submit", value="Sign up!", style="display: block; width: 100%; background-color: rgb(22, 71, 101)")
-          
 
     footer(style="margin-top: 5.8em; margin-bottom: 2em")
       center

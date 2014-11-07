@@ -3,17 +3,17 @@ html
   head
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
     title Chess Online
-    link(rel='stylesheet', href='libs/bootstrap/dist/css/bootstrap.min.css')
-    link(rel='stylesheet', href='libs/font-awesome/css/font-awesome.min.css')
-    link(rel='stylesheet', href='css/main.css')
-    script(src="js/underscore.min.js")
-    script(src="libs/jquery/dist/jquery.min.js")
-    script(src="libs/bootstrap/dist/js/bootstrap.min.js")
-    script(src="libs/socket.io-client/socket.io.js")
-    script(src="libs/notifyjs/notify.min.js")
-    script(src="libs/angular/angular.min.js")
-    script(src="libs/angular-route/angular-route.min.js")
-    script(src="js/app.js")
+    link(rel='stylesheet', href='/libs/bootstrap/dist/css/bootstrap.min.css')
+    link(rel='stylesheet', href='/libs/font-awesome/css/font-awesome.min.css')
+    link(rel='stylesheet', href='/css/main.css')
+    script(src="/js/underscore.min.js")
+    script(src="/libs/jquery/dist/jquery.min.js")
+    script(src="/libs/bootstrap/dist/js/bootstrap.min.js")
+    script(src="/libs/socket.io-client/socket.io.js")
+    script(src="/libs/notifyjs/notify.min.js")
+    script(src="/libs/angular/angular.min.js")
+    script(src="/libs/angular-route/angular-route.min.js")
+    script(src="/js/app.js")
     base(href='/')
 
 
@@ -45,9 +45,9 @@ html
                   span(style="margin-left: 0.4em; font-weight: bold") 1
 
                 #friend-requests-popover(style="display: none", data-toggle="popover")
-                  {{ friends.pending.received }}
+                  p {{ friends.pending.received }}
                   h4 --------------------------------
-                  {{ friends.pending.sent }}
+                  p {{ friends.pending.sent }}
                   h4 --------------------------------
                   h4 Received:
                   .search-result(ng-repeat="user in friends.pending.received | orderBy:'username'", style="position: relative; height: 3.2em")

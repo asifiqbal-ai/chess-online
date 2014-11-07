@@ -72,6 +72,7 @@ var httpServer = app.listen(process.env.PORT || 8080);
 // set up sockets.io =========================================================
 var sio = socketIO(httpServer);
 var activeSocketsCount = {/* counts active sockets per user */};
+
 sockets.initialize(sio);
 
 sio.use(function(socket, next) {
@@ -149,7 +150,7 @@ User.remove({}, function(err) {
     SomeOtherDude.sent_friend_requests.push(Ahmed);
     Ahmed.recv_friend_requests.push(SomeOtherDude);
 
-    SomeOtherDude.save(function() {
+    SomeOtherDude.save(function(err) {
         Ahmed.save(function(err){
             var Basil = new User({
                 first_name: "basil",

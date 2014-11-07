@@ -2,19 +2,7 @@ var _ = require('underscore');
 var sio;
 
 
-var extractSafeFields = function(user) {
-    return {
-        first_name: user.first_name,
-        last_name: user.last_name,
-        username: user.username,
-        email: user.email,
-        online: user.online,
-        rank: user.rank
-    };
-};
-
-
-var broadcast_to_population = function(user, population, event, data) {
+var broadcast_to_populations = function(user, population, event, data) {
     user.populate(population, function() {
         _.each(population.split(' '), function(field) {
             _.each(user[field], function(friend) {
@@ -41,7 +29,7 @@ module.exports.userConnected = function(sio, socket, user) {
     // subsequent sockets from this user. 
     // Use this function to track user sign ons
     var toNotify = 'friends sent_friend_requests recv_friend_requests';
-    broadcast_to_population(user, toNotify, 'friend update partial', extractSafeFields(user));
+    broadcast_to_populations(user, toNotify, 'friend update partial', user.toSafeObject());
 };
 
 
@@ -49,16 +37,11 @@ module.exports.userDisconnected = function(sio, socket, user) {
     // Called when a user has no more active sockets 
     // Use this function to track user sign offs
     var toNotify = 'friends sent_friend_requests recv_friend_requests';
-    broadcast_to_population(user, toNotify, 'friend update partial', extractSafeFields(user));
+    broadcast_to_populations(user, toNotify, 'friend update partial', user.toSafeObject());
 };
 
 
 module.exports.onConnection = function(sio, socket, user) {
     // Called for every socket connection
-    // Use this function for main logic
-
-    socket.join(user.id);
-
-    socket.emit('hello', user.id);
-    sio.to(user.id).emit('via_room', user.id);
+    socket.join(user.id); // Each user has their own room
 };

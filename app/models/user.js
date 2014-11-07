@@ -180,9 +180,24 @@ UserSchema.statics.search = function(keyword, callback) {
 
 
 UserSchema.statics.findOneExact = function(id, callback) {
-    // id: username or email
-    var r = new RegExp('^' + id + '$', 'i');
-    return this.findOne({$or: [{username: r},{email: r}]}, callback);
+    /*
+     * id: string -> will be applied for both email or username
+     *     object[email] -> will be applied to email
+     *     object[username] -> will be applied to username
+     */
+    var u, e;
+
+    if(typeof id == 'string') {
+        u = new RegExp('^' + id + '$', 'i');
+        e = u;
+    } else if(typeof id == 'object') {
+        u = new RegExp('^' + id.username + '$', 'i');
+        e = new RegExp('^' + id.email + '$', 'i');
+    } else {
+        return callback(new Error("Invalid id"));
+    }
+
+    return this.findOne({$or: [{username: u},{email: e}]}, callback);
 }
 
 
@@ -204,6 +219,40 @@ UserSchema.pre('save', function(next) {
         next(new Error("invalid password"));
     }
 });
+
+
+// validation ======================================================================
+var v = function(path, fn, message) {
+    UserSchema.path(path).validate(fn, message);
+};
+
+var vName = function(name) {
+    return name.length >= 3 && /^[a-z ]+$/i.test(name);
+};
+
+var vUsername = function(username) {
+    return username.length >= 4 && /^\w+$/.test(username);
+};
+
+var vEmail = function(email) {
+    return /[^\s@]+@[^\s@]+\.[^\s@]+/.test(email);
+};
+
+var vPassword = function(password) {
+    return password.length >= 8;
+};
+
+
+v('first_name', vName, 
+    'Invalid first name: Must only contain characters, and length must be at least 3.');
+v('last_name', vName, 
+    'Invalid last name: Must only contain characters, and length must be at least 3.');
+v('username', vUsername, 
+    'Invalid username: Must only contain letters and numbers, and length must be at least 4.');
+v('email', vEmail, 
+    'Invalid email.');
+v('password', vPassword, 
+    'Invalid password: length must be at least 8.');
 
 
 // exports =========================================================================
