@@ -3,15 +3,22 @@ div(style="position: relative")
     span.fa.fa-user.fa(style="margin: 0 0.3em 0 0; padding: 0")
     | {{ friends.cache[username].first_name }} {{ friends.cache[username].last_name }}
 
-  input.btn.btn-danger(type="button", value="Unfriend", ng-click="unfriend()", style="position: absolute; top: 0; right: 0;", ng-if="friends.cache[username].is_friend")
+  .buttons
+    input.btn.btn-default(type="button", value="Unfriend", ng-click="cancel_request(username)", style="position: absolute; top: 0; right: 0;", ng-if="friends.cache[username].friend_status === 'friends'")
 
-  input.btn.btn-default(type="button", value="Friend request sent", style="position: absolute; top: 0; right: 0;", disabled="true", ng-if="friends.cache[username].has_sent_request")
-  input.btn.btn-danger(type="button", value="Cancel request", style="position: absolute; top: 38px; right: 0;", ng-click="unfriend()", ng-if="friends.cache[username].has_sent_request")
+    input.btn.btn-default.ref1(type="button", value="Friend request sent", style="position: absolute; top: 0; right: 0;", disabled="true", ng-if="friends.cache[username].friend_status === 'sent'")
+    input.btn.btn-danger.tar1(type="button", value="Cancel request", style="position: absolute; top: 38px; right: 0;", ng-click="cancel_request(username)", ng-if="friends.cache[username].friend_status === 'sent'")
 
-  input.btn.btn-success(type="button", value="Accept friend request", ng-click="friend_request()", style="position: absolute; top: 0; right: 0;", ng-if="friends.cache[username].has_recv_request",)
-  input.btn.btn-danger(type="button", value="Deny friend request", ng-click="unfriend()", style="position: absolute; top: 38px; right: 0;", ng-if="friends.cache[username].has_recv_request",)
+    input.btn.btn-success.ref2(type="button", value="Accept friend request", ng-click="make_request(username)", style="position: absolute; top: 0; right: 0;", ng-if="friends.cache[username].friend_status === 'received'",)
+    input.btn.btn-danger.tar2(type="button", value="Deny friend request", ng-click="cancel_request(username)", style="position: absolute; top: 38px; right: 0;", ng-if="friends.cache[username].friend_status === 'received'",)
 
-  input.btn.btn-primary(type="button", value="Add friend", ng-click="friend_request()", style="position: absolute; top: 0; right: 0;", ng-if="friends.cache[username].no_interaction")
+    input.btn.btn-primary(type="button", value="Add friend", ng-click="make_request(username)", style="position: absolute; top: 0; right: 0;", ng-if="friends.cache[username].friend_status === 'none'")
+
+    script.
+      $(function() {
+        $('.tar1').css('width', $('.ref1').css('width'));
+        $('.tar2').css('width', $('.ref2').css('width'));
+      });
 
 h3 username: {{ friends.cache[username].username }}
 h3 rank: {{ friends.cache[username].rank }}

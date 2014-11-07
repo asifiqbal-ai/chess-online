@@ -1,0 +1,19 @@
+h3(style="position: absolute; top: 0.2em; left: 0.3em; margin: 0") {{ user.first_name }} {{ user.last_name }}
+a(href="/user/{{ user.username }}", style="position: absolute; bottom: 0.3em; left: 0.6em; margin: 0") {{ user.username }}
+  span(style="font-size: 80%; font-style: italic") ({{ user.rank }})
+
+input.btn.btn-default.friends-btn-dir(type="button", value="unfriend", ng-if="user.friend_status === 'friends'", ng-click="cancel_request(username)")
+
+input.btn.btn-danger.friends-btn-dir(type="button", value="cancel request", ng-if="user.friend_status === 'sent'", ng-click="cancel_request(username)")
+
+input.btn.btn-success.friends-btn-dir(type="button", value="accept request", ng-if="user.friend_status === 'received'", ng-click="make_request(username)")
+
+input.btn.btn-primary.friends-btn-dir(type="button", value="add friend", ng-if="user.friend_status === 'none'", ng-click="make_request(username)")
+
+style.
+  .friends-btn-dir {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    padding: 0.2em 0.32em 0.2em 0.32em;
+  }

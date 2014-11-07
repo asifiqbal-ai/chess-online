@@ -2,11 +2,16 @@ var _ = require('underscore');
 var sio;
 
 
-var broadcast_to_populations = function(user, population, event, data) {
+var extendFriend = function(user, friend) {
+    return _.extend(friend.toSafeObject(), {friend_status: user.friendStatus(friend)});
+}
+
+
+var broadcast_to_populations = function(user, population, event) {
     user.populate(population, function() {
         _.each(population.split(' '), function(field) {
             _.each(user[field], function(friend) {
-                sio.to(friend.id).emit(event, data);
+                sio.to(friend.id).emit(event, extendFriend(friend, user));
             });
         });
     });
@@ -29,7 +34,7 @@ module.exports.userConnected = function(sio, socket, user) {
     // subsequent sockets from this user. 
     // Use this function to track user sign ons
     var toNotify = 'friends sent_friend_requests recv_friend_requests';
-    broadcast_to_populations(user, toNotify, 'friend update partial', user.toSafeObject());
+    broadcast_to_populations(user, toNotify, 'friend update partial');
 };
 
 
@@ -37,7 +42,7 @@ module.exports.userDisconnected = function(sio, socket, user) {
     // Called when a user has no more active sockets 
     // Use this function to track user sign offs
     var toNotify = 'friends sent_friend_requests recv_friend_requests';
-    broadcast_to_populations(user, toNotify, 'friend update partial', user.toSafeObject());
+    broadcast_to_populations(user, toNotify, 'friend update partial');
 };
 
 

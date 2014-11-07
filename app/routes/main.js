@@ -31,6 +31,10 @@ module.exports = function(router) {
         res.render('auth/views/' + req.params.view_name);
     });
 
+    router.get('/views/directives/:view_name', function(req, res) {
+        res.render('auth/views/directives/' + req.params.view_name);
+    });
+
     router.post('/login',
         passport.authenticate('local', {
             successRedirect: '/',
